@@ -44,7 +44,7 @@ def install_dependencies():
 Fore, Style = install_dependencies()
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="CyberSift - Advanced reconnaissance tool for Red Team operations")
+    parser = argparse.ArgumentParser(description="Advanced reconnaissance tool for Red Team operations")
     parser.add_argument('-i', action='store_true', help='Install tools')
     parser.add_argument('-u', action='store_true', help='Update tools')
     parser.add_argument('-p', type=str, default='socks5://127.0.0.1:1080', help='Custom proxy address')
@@ -115,7 +115,7 @@ def test_command(command):
         return False
 
 def load_config():
-    config_path = os.path.join(os.getcwd(), 'cybersift/recon-config.json')
+    config_path = os.path.join(os.getcwd(), 'recon-config.json')
     default_config = {'LastNucleiUpdate': '1970-01-01T00:00:00Z', 'InstalledTools': {}}
     if os.path.exists(config_path):
         with open(config_path, 'r', encoding='utf-8') as f:
@@ -126,7 +126,7 @@ def load_config():
         return default_config
 
 def save_config(config):
-    config_path = os.path.join(os.getcwd(), 'cybersift/recon-config.json')
+    config_path = os.path.join(os.getcwd(), 'recon-config.json')
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config, f)
 
@@ -139,7 +139,7 @@ def strip_ansi_codes(text):
 def download_subdomain_wordlists(wordlist_dir):
     os.makedirs(wordlist_dir, exist_ok=True)
     wordlists = [
-        {'name': 'subdomains-top1million-5000.txt', 'url': 'https://idovedu.github.io/cybersift/wordlists/subdomains-top1million-5000.txt'}
+        {'name': 'subdomains-top1million-5000.txt', 'url': 'https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/subdomains-top1million-5000.txt'}
     ]
     downloaded = False
     for wordlist in wordlists:
@@ -191,58 +191,24 @@ def create_input_files(domain_file, wordlist_file):
         log(f"Created {domain_file}")
     
     if not os.path.exists(wordlist_file):
-        wordlist_url = 'https://idovedu.github.io/cybersift/wordlists/wordlist-for-check-vulnerability.txt'
-        log(f"Downloading {wordlist_file} from {wordlist_url}...")
-        try:
-            response = requests.get(wordlist_url, timeout=10)
-            if response.status_code == 200:
-                with open(wordlist_file, 'w', encoding='utf-8') as f:
-                    f.write(response.text)
-                log(f"Downloaded {wordlist_file}")
-            else:
-                log(f"Failed to download {wordlist_file}: Status {response.status_code}", color=Fore.YELLOW)
-                sample_wordlist = [
-                    '.bak', '.config', '.db', '.env', '.git', '.sql', '.asp', '.aspx', '.html', '.js', 
-                    '.php', '.tar', '.txt', '.zip', '.yaml', '.yml', '.conf', '.log', '.swp', '.old', 
-                    '.backup', '.tar.gz', '.zip.bak', 'account', 'admin', 'admin-login', 'adminpanel', 
-                    'api', 'api/v1', 'api/v2', 'api_key', 'apikey', 'assetsmanager', 'auth', 'backup', 
-                    'backup.sql', 'browse', 'bucket', 'ckeditor', 'cmd', 'conf', 'config', 'config.json', 
-                    'config.bak', 'connectors', 'console', 'control', 'controlpanel', 'crm', 'dashboard', 
-                    'database', 'db.sql', 'data.json', 'debug', 'dev', 'editor', 'env', 'fckeditor', 
-                    'filemanager', 'fileupload', 'git', 'graphql', 'graphql/v1', 'internal', 'json', 
-                    'key', 'login', 'login.php', 'login.aspx', 'mail', 'manage', 'panel', 'phpinfo', 
-                    'portal', 'private', 'profile', 'register', 'rest', 'api/rest', 's3', 'secret', 
-                    'secure', 'server', 'settings', 'settings.json', 'signin', 'signup', 'staging', 
-                    'swagger', 'test', 'tinemc', 'tiny', 'token', 'upload', 'upload.php', 'uploadfile', 
-                    'user', 'wp-admin', 'xml', 'admin.php', 'auth.php', 'admin/dashboard', 'backup.zip',
-                    'config.yml', 'backup.tar', 'admin-console', 'api/v3', 'graphql/v2', 'settings.yaml',
-                    'db.backup', 'auth.json', 'control-panel', 'upload-dir', 'file-upload', 'api-token'
-                ]
-                with open(wordlist_file, 'w', encoding='utf-8') as f:
-                    f.write('\n'.join(sorted(set(sample_wordlist))) + '\n')
-                log(f"Created {wordlist_file} with {len(sample_wordlist)} sample entries")
-        except Exception as e:
-            log(f"Error downloading {wordlist_file}: {e}", color=Fore.YELLOW)
-            sample_wordlist = [
-                '.bak', '.config', '.db', '.env', '.git', '.sql', '.asp', '.aspx', '.html', '.js', 
-                '.php', '.tar', '.txt', '.zip', '.yaml', '.yml', '.conf', '.log', '.swp', '.old', 
-                '.backup', '.tar.gz', '.zip.bak', 'account', 'admin', 'admin-login', 'adminpanel', 
-                'api', 'api/v1', 'api/v2', 'api_key', 'apikey', 'assetsmanager', 'auth', 'backup', 
-                'backup.sql', 'browse', 'bucket', 'ckeditor', 'cmd', 'conf', 'config', 'config.json', 
-                'config.bak', 'connectors', 'console', 'control', 'controlpanel', 'crm', 'dashboard', 
-                'database', 'db.sql', 'data.json', 'debug', 'dev', 'editor', 'env', 'fckeditor', 
-                'filemanager', 'fileupload', 'git', 'graphql', 'graphql/v1', 'internal', 'json', 
-                'key', 'login', 'login.php', 'login.aspx', 'mail', 'manage', 'panel', 'phpinfo', 
-                'portal', 'private', 'profile', 'register', 'rest', 'api/rest', 's3', 'secret', 
-                'secure', 'server', 'settings', 'settings.json', 'signin', 'signup', 'staging', 
-                'swagger', 'test', 'tinemc', 'tiny', 'token', 'upload', 'upload.php', 'uploadfile', 
-                'user', 'wp-admin', 'xml', 'admin.php', 'auth.php', 'admin/dashboard', 'backup.zip',
-                'config.yml', 'backup.tar', 'admin-console', 'api/v3', 'graphql/v2', 'settings.yaml',
-                'db.backup', 'auth.json', 'control-panel', 'upload-dir', 'file-upload', 'api-token'
-            ]
-            with open(wordlist_file, 'w', encoding='utf-8') as f:
-                f.write('\n'.join(sorted(set(sample_wordlist))) + '\n')
-            log(f"Created {wordlist_file} with {len(sample_wordlist)} sample entries")
+        sample_wordlist = [
+            '.bak', '.config', '.db', '.env', '.git', '.sql', '.asp', '.aspx', '.html', '.js', 
+            '.php', '.tar', '.txt', '.zip', '.yaml', '.yml', '.conf', '.log', '.swp', '.old', 
+            '.backup', '.tar.gz', '.zip.bak', 'account', 'admin', 'admin-login', 'adminpanel', 
+            'api', 'api/v1', 'api/v2', 'api_key', 'apikey', 'assetsmanager', 'auth', 'backup', 
+            'backup.sql', 'browse', 'bucket', 'ckeditor', 'cmd', 'conf', 'config', 'config.json', 
+            'config.bak', 'connectors', 'console', 'control', 'controlpanel', 'crm', 'dashboard', 
+            'database', 'db.sql', 'data.json', 'debug', 'dev', 'editor', 'env', 'fckeditor', 
+            'filemanager', 'fileupload', 'git', 'graphql', 'graphql/v1', 'internal', 'json', 
+            'key', 'login', 'login.php', 'login.aspx', 'mail', 'manage', 'panel', 'phpinfo', 
+            'portal', 'private', 'profile', 'register', 'rest', 'api/rest', 's3', 'secret', 
+            'secure', 'server', 'settings', 'settings.json', 'signin', 'signup', 'staging', 
+            'swagger', 'test', 'tinemc', 'tiny', 'token', 'upload', 'upload.php', 'uploadfile', 
+            'user', 'wp-admin', 'xml', 'admin.php', 'auth.php', 'admin/dashboard', 'backup.zip'
+        ]
+        with open(wordlist_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(sorted(set(sample_wordlist))) + '\n')
+        log(f"Created {wordlist_file} with {len(sample_wordlist)} sample entries")
     update_wordlist(wordlist_file)
 
 def install_or_update_tools(update_only=False):
@@ -382,17 +348,19 @@ def validate_url(url):
     return {'status': 'Pending', 'content_length': 'N/A', 'content_type': 'N/A'}
 
 def extract_base_domain(domain):
+    """Extract the base domain name (e.g., 'samajaepaper' from 'samajaepaper.net')."""
     try:
         parsed = urlparse(f"http://{domain}")
         netloc = parsed.netloc
         parts = netloc.split('.')
         if len(parts) >= 2:
-            return parts[-2]
+            return parts[-2]  # e.g., 'samajaepaper' from 'samajaepaper.net'
         return netloc
     except:
         return domain.split('.')[0]
 
 def extract_tld(domain):
+    """Extract the TLD (e.g., 'net' from 'samajaepaper.net')."""
     try:
         parsed = urlparse(f"http://{domain}")
         netloc = parsed.netloc
@@ -411,6 +379,7 @@ def discover_assets(domain, output_dir, threads, use_proxy, proxy_url):
     base_domain = extract_base_domain(domain)
     log(f"Base domain: {base_domain}")
 
+    # 1. Assetfinder
     if test_command('assetfinder'):
         log("Running assetfinder...")
         assetfinder_args = ['assetfinder', '--subs-only', domain]
@@ -427,6 +396,7 @@ def discover_assets(domain, output_dir, threads, use_proxy, proxy_url):
         except Exception as e:
             log(f"Error running assetfinder: {e}", color=Fore.YELLOW)
 
+    # 2. Favicon Hash with FavFreak
     if test_command('favfreak'):
         log("Extracting favicon hashes...")
         favfreak_dir = os.path.join(output_dir, 'favfreak')
@@ -449,6 +419,7 @@ def discover_assets(domain, output_dir, threads, use_proxy, proxy_url):
             except Exception as e:
                 log(f"Error running favfreak: {e}", color=Fore.YELLOW)
 
+    # 3. SSL Certificate with ctfr
     if test_command('ctfr'):
         log("Searching SSL certificates with ctfr...")
         ctfr_output = os.path.join(output_dir, 'ctfr.json')
@@ -465,6 +436,7 @@ def discover_assets(domain, output_dir, threads, use_proxy, proxy_url):
         except Exception as e:
             log(f"Error running ctfr: {e}", color=Fore.YELLOW)
 
+    # 4. OSINT with theHarvester for related domains
     if test_command('theHarvester'):
         log("Running theHarvester for OSINT...")
         harvester_output = os.path.join(output_dir, 'harvester.xml')
@@ -487,6 +459,7 @@ def discover_assets(domain, output_dir, threads, use_proxy, proxy_url):
         except Exception as e:
             log(f"Error running theHarvester: {e}", color=Fore.YELLOW)
 
+    # 5. DNS Records
     if test_command('dnsx'):
         log("Checking additional DNS records...")
         dns_temp_file = os.path.join(output_dir, 'dns_temp.txt')
@@ -506,10 +479,12 @@ def discover_assets(domain, output_dir, threads, use_proxy, proxy_url):
         except Exception as e:
             log(f"Error running dnsx for additional records: {e}", color=Fore.YELLOW)
 
+    # Save assets
     with open(assets_file, 'w', encoding='utf-8') as f:
         f.write('\n'.join(sorted(assets)) + '\n')
     log(f"Saved {len(assets)} unique assets to {assets_file}")
 
+    # Validate assets with httpx
     validated_results = []
     if test_command('httpx') and assets:
         log("Validating assets with httpx...")
@@ -622,7 +597,7 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
     if missing_optional_tools:
         log(f"Optional tools missing: {', '.join(missing_optional_tools)}. Some features may be limited.", color=Fore.YELLOW)
 
-    wordlist_dir = os.path.join(os.getcwd(), 'cybersift/subdomain_wordlists')
+    wordlist_dir = os.path.join(os.getcwd(), 'subdomain_wordlists')
     download_subdomain_wordlists(wordlist_dir)
     create_input_files(domain_file, wordlist_file)
 
@@ -639,8 +614,10 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
         crawling_file = os.path.join(domain_dir, 'crawled-urls.txt')
         sensitive_dir = os.path.join(domain_dir, 'sensitive_urls')
 
+        # Asset Discovery
         assets = discover_assets(domain, domain_dir, threads, use_proxy, proxy_url)
 
+        # Subdomain enumeration
         log(f"Enumerating subdomains for {domain}...")
         subfinder_args = ['subfinder', '-d', domain, '-o', subfinder_file, '-silent', '-t', str(threads), '-all', '--no-color']
         if use_proxy:
@@ -648,6 +625,7 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
         subprocess.run(subfinder_args, capture_output=True, text=True)
         deduplicate_file(subfinder_file)
 
+        # Subdomain fuzzing
         if test_command('puredns'):
             log(f"Fuzzing subdomains for {domain}...")
             wordlists = [
@@ -665,8 +643,10 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
                 else:
                     log(f"Wordlist {wordlist} not found, skipping", color=Fore.YELLOW)
 
+        # Merge subdomains
         merge_subdomains(subfinder_file, fuzz_file, valid_subdomains_file)
 
+        # DNS resolution
         if os.path.exists(valid_subdomains_file) and os.path.getsize(valid_subdomains_file) > 0:
             log(f"Resolving DNS records for {domain}...")
             dnsx_args = ['dnsx', '-l', valid_subdomains_file, '-a', '-aaaa', '-o', dns_file, '-t', str(threads), '-silent', '-resp', '--no-color']
@@ -675,6 +655,7 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
             subprocess.run(dnsx_args, capture_output=True, text=True)
             deduplicate_file(dns_file)
 
+        # Web services with technology detection
         if os.path.exists(valid_subdomains_file) and os.path.getsize(valid_subdomains_file) > 0:
             log(f"Discovering web services and technologies for {domain}...")
             httpx_args = ['httpx', '-l', valid_subdomains_file, '-o', sub_status_file, '-tech-detect', '-status-code', '-t', str(threads), '-silent', '-follow-redirects', '--no-color']
@@ -683,6 +664,7 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
             subprocess.run(httpx_args, capture_output=True, text=True)
             deduplicate_file(sub_status_file)
 
+        # Crawling URLs
         if os.path.exists(sub_status_file) and os.path.getsize(sub_status_file) > 0:
             log(f"Crawling URLs with katana for {domain}...")
             katana_args = ['katana', '-u', sub_status_file, '-o', crawling_file, '-silent', '-c', str(threads), '-js-crawl', '-js-lu', '-depth', '8', '-crawl-hidden-paths', '--no-color']
@@ -715,8 +697,10 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
                 subprocess.run(waymore_args, capture_output=True, text=True)
                 deduplicate_file(crawling_file)
 
+        # Categorize URLs
         sensitive_endpoints = categorize_urls(crawling_file, wordlist_file, sensitive_dir, threads)
 
+        # Generate report
         log(f"Generating report for {domain}...")
         dns_content = 'No DNS records found'
         if os.path.exists(dns_file) and os.path.getsize(dns_file) > 0:
@@ -770,6 +754,7 @@ def run_recon(domain_file, output_dir, wordlist_file, threads, use_proxy, report
                 table += '</tbody></table></div>'
                 sensitive_html += table
 
+        # Assets HTML
         assets_html = ''
         if assets:
             table = f'''
